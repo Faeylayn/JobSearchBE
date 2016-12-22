@@ -21,6 +21,10 @@ class Listing(Base):
     __tablename__ = 'Listing'
     id = Column(Integer, primary_key=True)
     UserId = Column(Integer, ForeignKey(User.id), nullable=False)
+    ListingName = Column(String(250), nullable=False)
+    ListingCompany = Column(String(250), nullable=False)
+    Link = Column(String(250), nullable=False)
+    ResultPage = Column(Text(), nullable=False)
 
 engine = create_engine('sqlite:///jobsearch.db')
 Base.metadata.create_all(engine)
@@ -62,6 +66,30 @@ class LoginUser(Resource):
             return {'error': str(e)}
 
 api.add_resource(LoginUser, '/LoginUser')
+
+class Listings(Resource):
+    # may need this if we decide to make users and auth a thing
+    def post(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('UserName', type=str, help='user_name address to lookup/create user')
+            args = parser.parse_args()
+
+            user_name = args['UserName']
+            user = session.query(User).filter(User.UserName == user_name).first()
+            if user is not None:
+                return {"Message": "Existing User"}
+            else:
+                new_person = User(UserName=user_name)
+                session.add(new_person)
+                session.commit()
+
+            return {'user_name': user_name}
+
+        except Exception as e:
+            return {'error': str(e)}
+
+api.add_resource(LoginUser, '/listings')
 
 
 
