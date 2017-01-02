@@ -13,15 +13,14 @@ from flask_socketio import SocketIO, send, emit
 
 Base = declarative_base()
 
-class User(Base):
-    __tablename__ = 'User'
-    id = Column(Integer, primary_key=True)
-    UserName = Column(String(250), nullable=False)
+# class User(Base):
+#     __tablename__ = 'User'
+#     id = Column(Integer, primary_key=True)
+#     UserName = Column(String(250), nullable=False)
 
 class Listing(Base):
     __tablename__ = 'Listing'
     id = Column(Integer, primary_key=True)
-    UserId = Column(Integer, ForeignKey(User.id), nullable=False)
     ListingName = Column(String(250), nullable=False)
     ListingCompany = Column(String(250), nullable=False)
     Link = Column(String(250), nullable=False)
@@ -72,11 +71,6 @@ class Listings(Resource):
     # may need this if we decide to make users and auth a thing
     def get(self):
         try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('UserId', type=int, help='user_id address to relate listing to user')
-            args = parser.parse_args()
-
-            user_id = args['UserId']
 
             try:
                 listings = session.query(Listing).filter(Listing.UserId == user_id).all()
@@ -93,17 +87,14 @@ class Listings(Resource):
     def post(self):
         try:
             parser = reqparse.RequestParser()
-            parser.add_argument('UserId', type=int, help='user_id address to relate listing to user')
-            parser.add_argument('Listing', type=int, help='listing to be added to the db')
+            parser.add_argument('Listing', type=str, help='listing to be added to the db')
             args = parser.parse_args()
 
-            user_id = args['UserId']
-
-            new_listing = Listing(UserId=user_id, )
+            new_listing = Listing()
             session.add(new_listing)
             session.commit()
 
-            return {'user_id': user_id}
+            return {}
 
         except Exception as e:
             return {'error': str(e)}
