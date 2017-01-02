@@ -7,6 +7,7 @@ import datetime
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Text, create_engine, desc
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm.exc import NoResultFound
 from flask_cors import CORS, cross_origin
 from flask_socketio import SocketIO, send, emit
 
@@ -43,53 +44,71 @@ socketio = SocketIO(app)
 # def unix_time_millis(dt):
 #     return (dt - epoch).total_seconds() * 1000.0
 
-class LoginUser(Resource):
-    # may need this if we decide to make users and auth a thing
-    def post(self):
-        try:
-            parser = reqparse.RequestParser()
-            parser.add_argument('UserName', type=str, help='user_name address to lookup/create user')
-            args = parser.parse_args()
-
-            user_name = args['UserName']
-            user = session.query(User).filter(User.UserName == user_name).first()
-            if user is not None:
-                return {"Message": "Existing User"}
-            else:
-                new_person = User(UserName=user_name)
-                session.add(new_person)
-                session.commit()
-
-            return {'user_name': user_name}
-
-        except Exception as e:
-            return {'error': str(e)}
-
-api.add_resource(LoginUser, '/LoginUser')
+# class LoginUser(Resource):
+#     # may need this if we decide to make users and auth a thing
+#     def post(self):
+#         try:
+#             parser = reqparse.RequestParser()
+#             parser.add_argument('UserName', type=str, help='user_name address to lookup/create user')
+#             args = parser.parse_args()
+#
+#             user_name = args['UserName']
+#             user = session.query(User).filter(User.UserName == user_name).first()
+#             if user is not None:
+#                 return {"Message": "Existing User"}
+#             else:
+#                 new_person = User(UserName=user_name)
+#                 session.add(new_person)
+#                 session.commit()
+#
+#             return {'user_name': user_name}
+#
+#         except Exception as e:
+#             return {'error': str(e)}
+#
+# api.add_resource(LoginUser, '/LoginUser')
 
 class Listings(Resource):
     # may need this if we decide to make users and auth a thing
-    def post(self):
+    def get(self):
         try:
             parser = reqparse.RequestParser()
-            parser.add_argument('UserName', type=str, help='user_name address to lookup/create user')
+            parser.add_argument('UserId', type=int, help='user_id address to relate listing to user')
             args = parser.parse_args()
 
-            user_name = args['UserName']
-            user = session.query(User).filter(User.UserName == user_name).first()
-            if user is not None:
-                return {"Message": "Existing User"}
-            else:
-                new_person = User(UserName=user_name)
-                session.add(new_person)
-                session.commit()
+            user_id = args['UserId']
 
-            return {'user_name': user_name}
+            try:
+                listings = session.query(Listing).filter(Listing.UserId == user_id).all()
+            except NoResultFound:
+                listings = []
+            return {
+                'user_id': user_id,
+                'listings': listings
+            }
 
         except Exception as e:
             return {'error': str(e)}
 
-api.add_resource(LoginUser, '/listings')
+    def post(self):
+        try:
+            parser = reqparse.RequestParser()
+            parser.add_argument('UserId', type=int, help='user_id address to relate listing to user')
+            parser.add_argument('Listing', type=int, help='listing to be added to the db')
+            args = parser.parse_args()
+
+            user_id = args['UserId']
+
+            new_listing = Listing(UserId=user_id, )
+            session.add(new_listing)
+            session.commit()
+
+            return {'user_id': user_id}
+
+        except Exception as e:
+            return {'error': str(e)}
+
+api.add_resource(Listings, '/listings')
 
 
 
