@@ -23,8 +23,9 @@ class Listing(Base):
     id = Column(Integer, primary_key=True)
     ListingName = Column(String(250), nullable=False)
     ListingCompany = Column(String(250), nullable=False)
-    Link = Column(String(250), nullable=False)
-    ResultPage = Column(Text(), nullable=False)
+    Link = Column(String(250), default=None)
+    ResultPage = Column(Text(), default=None)
+    Status = Column(String(250), default=None)
 
 engine = create_engine('sqlite:///jobsearch.db')
 Base.metadata.create_all(engine)
@@ -71,8 +72,19 @@ class Listings(Resource):
                 listings = session.query(Listing).all()
             except NoResultFound:
                 listings = []
+
+            parsed_listings = []
+
+            for listing in listings:
+                temp_listing = {
+                    'ListingName': listing.ListingName,
+                    'ListingCompany': listing.ListingCompany,
+                    'Link': listing.Link,
+                    'Status': listing.Status
+                }
+                parsed_listings.append(temp_listing)
             return {
-                'listings': listings
+                'listings': parsed_listings
             }
 
         except Exception as e:
@@ -88,7 +100,7 @@ class Listings(Resource):
 
             args = parser.parse_args()
 
-            listing = session.query(Listing).filter(Listing.ListinName == args['ListingName']).first()
+            listing = session.query(Listing).filter(Listing.ListingName == args['ListingName']).first()
 
             if listing is not None:
                 return {"Message": "Existing User"}
@@ -98,7 +110,7 @@ class Listings(Resource):
                 session.add(new_listing)
                 session.commit()
 
-            return {'listing': new_listing}
+            return {'listing': 'success'}
 
         except Exception as e:
             return {'error': str(e)}
