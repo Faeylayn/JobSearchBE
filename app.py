@@ -98,11 +98,12 @@ class Listings(Resource):
             if listing is not None:
                 return {"Message": "Existing User"}
             else:
-                new_listing = Listing()
+                new_listing = Listing(ListingName=args['ListingName'], ListingCompany=args['ListingCompany'],
+                    Link=args['Link'], ResultPage=args['ResultPage'])
                 session.add(new_listing)
                 session.commit()
 
-            return {}
+            return {'listing': new_listing}
 
         except Exception as e:
             return {'error': str(e)}
