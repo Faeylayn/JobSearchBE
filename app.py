@@ -37,11 +37,7 @@ app = Flask(__name__)
 CORS(app)
 api = Api(app)
 socketio = SocketIO(app)
-#
-# epoch = datetime.datetime.utcfromtimestamp(0)
-#
-# def unix_time_millis(dt):
-#     return (dt - epoch).total_seconds() * 1000.0
+
 
 # class LoginUser(Resource):
 #     # may need this if we decide to make users and auth a thing
@@ -68,7 +64,6 @@ socketio = SocketIO(app)
 # api.add_resource(LoginUser, '/LoginUser')
 
 class Listings(Resource):
-    # may need this if we decide to make users and auth a thing
     def get(self):
         try:
 
