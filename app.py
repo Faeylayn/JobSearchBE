@@ -73,11 +73,10 @@ class Listings(Resource):
         try:
 
             try:
-                listings = session.query(Listing).filter(Listing.UserId == user_id).all()
+                listings = session.query(Listing).all()
             except NoResultFound:
                 listings = []
             return {
-                'user_id': user_id,
                 'listings': listings
             }
 
@@ -87,12 +86,21 @@ class Listings(Resource):
     def post(self):
         try:
             parser = reqparse.RequestParser()
-            parser.add_argument('Listing', type=str, help='listing to be added to the db')
+            parser.add_argument('ListingName', type=str, help='name of listing to be added to the db')
+            parser.add_argument('ListingCompany', type=str, help='company of listing to be added to the db')
+            parser.add_argument('Link', type=str, help='the muse link of listing to be added to the db')
+            parser.add_argument('ResultPage', type=str, help='html of listing to be added to the db')
+
             args = parser.parse_args()
 
-            new_listing = Listing()
-            session.add(new_listing)
-            session.commit()
+            listing = session.query(Listing).filter(Listing.ListinName == args['ListingName']).first()
+
+            if listing is not None:
+                return {"Message": "Existing User"}
+            else:
+                new_listing = Listing()
+                session.add(new_listing)
+                session.commit()
 
             return {}
 
