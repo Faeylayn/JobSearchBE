@@ -80,7 +80,8 @@ class Listings(Resource):
                     'ListingName': listing.ListingName,
                     'ListingCompany': listing.ListingCompany,
                     'Link': listing.Link,
-                    'Status': listing.Status
+                    'Status': listing.Status,
+                    'Id': listing.id
                 }
                 parsed_listings.append(temp_listing)
             return {
